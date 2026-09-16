@@ -1,36 +1,74 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# stellar-pay-frontend
 
-## Getting Started
+Read-only merchant dashboard for `stellar-pay`, an open-source XLM payment
+infrastructure project. Built with Next.js (App Router), TypeScript, and
+Tailwind CSS.
 
-First, run the development server:
+## Scope (v0.1)
+
+This dashboard is read-only:
+
+- Lists payments with status filtering and pagination.
+- Shows a payment's detail view with a status timeline.
+- Shows webhook delivery attempts for a payment.
+
+Explicitly out of scope for v0.1:
+
+- No payment-creation UI. Merchants integrate directly against the
+  `stellar-pay-backend` API to create payments.
+- No authentication. The backend has none in v0.1 either.
+
+## Backend dependency
+
+This app is a thin client over the `stellar-pay-backend` API and has no
+shared code or database with it. It depends on these backend endpoints:
+
+- `GET /v1/payments` (paginated list, optional `status` filter)
+- `GET /v1/payments/:id` (single payment)
+- `GET /v1/payments/:id/webhook-events` (webhook delivery attempts for a payment)
+- `GET /health` (used by the header's live/offline indicator)
+
+**`GET /v1/payments` and `GET /v1/payments/:id/webhook-events` are new
+endpoints required by this dashboard and may not exist yet in the backend
+repo**, since `stellar-pay-backend` is being built in parallel. The API
+client here is written against the documented contract; nothing in this repo
+assumes the backend is currently running.
+
+## Setup
+
+```bash
+npm install
+cp .env.example .env
+```
+
+Set `NEXT_PUBLIC_API_BASE_URL` in `.env` to point at a running
+`stellar-pay-backend` instance (defaults to `http://localhost:3000`).
+
+## Run
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Build
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run build
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Test
 
-## Learn More
+```bash
+npm run test
+```
 
-To learn more about Next.js, take a look at the following resources:
+Vitest + React Testing Library cover pure logic (`src/lib/format.ts`,
+`src/lib/api.ts`) and the two components with real interactive logic
+(`StatusBadge`, `CopyableAddress`). Server Components are left to manual QA
+and a future Playwright pass rather than forced into React Testing Library.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Lint
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run lint
+```
